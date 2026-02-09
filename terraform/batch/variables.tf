@@ -59,7 +59,7 @@ variable "business_owner_tag" {
 
 # EventBridge Lambda variables
 
-variable "ecr_repository_name" {
+variable "ecr_repository" {
   description = "Name of the ECR repository"
   type        = string
   default     = "sdp-dev-github-scraper"

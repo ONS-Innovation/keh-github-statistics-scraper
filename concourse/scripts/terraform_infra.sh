@@ -11,7 +11,7 @@ aws_access_key_id=$(echo "$secrets" | jq -r .aws_access_key_id)
 aws_secret_access_key=$(echo "$secrets" | jq -r .aws_secret_access_key)
 
 domain=$(echo "$secrets" | jq -r .domain)
-ecr_repository_name=$(echo "$secrets" | jq -r .ecr_repository_name)
+ecr_repository=$(echo "$secrets" | jq -r .ecr_repository)
 
 lambda_timeout=$(echo "$secrets" | jq -r .lambda_timeout)
 
@@ -46,7 +46,7 @@ terraform apply \
 	-var "aws_access_key_id=$aws_access_key_id" \
 	-var "aws_secret_access_key=$aws_secret_access_key" \
 	-var "domain=$domain" \
-	-var "ecr_repository_name=$ecr_repository_name" \
+	-var "ecr_repository=$ecr_repository" \
 	-var "github_app_client_id=$github_app_client_id" \
 	-var "aws_secret_name=$aws_secret_name" \
 	-var "github_org=$github_org" \
