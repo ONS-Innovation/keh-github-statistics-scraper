@@ -22,7 +22,7 @@ module "batch_eventbridge" {
   project_tag         = var.project_tag
   team_owner_tag      = var.team_owner_tag
   business_owner_tag  = var.business_owner_tag
-  ecr_repository_name = var.ecr_repository_name
+  ecr_repository_name = var.ecr_repository
   container_ver       = var.container_ver
   schedule           = var.schedule
   private_subnet_ids = data.terraform_remote_state.vpc.outputs.private_subnets

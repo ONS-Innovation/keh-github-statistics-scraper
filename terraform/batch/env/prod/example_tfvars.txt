@@ -10,5 +10,5 @@ aws_secret_name       = "/sdp-dev/github-tooling-suite/onsdigital"
 github_org            = "onsdigital"
 container_ver         = "v0.0.1"
 batch_size            = 20  
-ecr_repository_name   = "sdp-prod-github-scraper-batch"
+ecr_repository        = "sdp-prod-github-scraper-batch"
 schedule              = "cron(30 0 ? * TUE,FRI *)"
