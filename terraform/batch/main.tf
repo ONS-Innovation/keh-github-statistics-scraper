@@ -73,7 +73,7 @@ resource "aws_iam_role_policy_attachment" "s3_policy_attachment" {
 
 # IAM User Group
 resource "aws_iam_group" "group" {
-  name = "${var.domain}-${var.service_subdomain}-group"
+  name = "${var.domain}-${var.service_subdomain}-user-group"
   path = "/"
 }
 
