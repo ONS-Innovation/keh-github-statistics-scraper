@@ -38,7 +38,7 @@ There are a few `TODOs` scattered throughout the README and codebase that will n
 - AWS CLI
 - Make
 
-## Getting started (test)
+## Getting started
 
 1. Install Dependencies:
 
@@ -46,16 +46,24 @@ There are a few `TODOs` scattered throughout the README and codebase that will n
     make install
     ```
 
-2. Export Environment Variables
+2. Sign in with AWS SSO, and export the correct profile for this service:
+
+   **Note:** See the Developer Onboarding Guide on the "Using AWS SSO for Local Development" page on Confluence to set up service profile selection on your local machine.
+
+   ```bash
+   aws sso login
+
+   export AWS_PROFILE=keh-github-statistics-scraper
+   ```
+
+   This allows you to assume the AWS IAM role for service, enabling the most secure development experience. This also means you will have limited permissions until you exit out of the profile.
+
+
+3. Export Environment Variables
 
     ```bash
-    # AWS
-    export AWS_ACCESS_KEY_ID=<KEY>
-    export AWS_SECRET_ACCESS_KEY=<SECRET>
-    export AWS_DEFAULT_REGION=<REGION>
-    export AWS_SECRET_NAME=/<env>/github-tooling-suite/<onsdigital/ons-innovation>
-
     # GitHub
+    export AWS_SECRET_NAME=/<env>/github-tooling-suite/<onsdigital/ons-innovation>
     export GITHUB_APP_CLIENT_ID=<CLIENT_ID>
     export GITHUB_ORG=<onsdigital/ons-innovation>
 
@@ -73,11 +81,17 @@ There are a few `TODOs` scattered throughout the README and codebase that will n
     | `batch_size`    | The number of repositories that will be scraped in each batch.                     |
     | `environment`   | Determines where to save the results. `development`: locally, `production`: to S3. |
 
-3. Run the script:
+4. Run the script:
 
     ```bash
     make run
     ```
+
+5. To exit the profile:
+
+   ```bash
+   unset AWS_PROFILE
+   ```
 
 ## Deployment
 
