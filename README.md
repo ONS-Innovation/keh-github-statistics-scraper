@@ -48,15 +48,15 @@ There are a few `TODOs` scattered throughout the README and codebase that will n
 
 2. Sign in with AWS SSO, and export the correct profile for this service:
 
-   **Note:** See the Developer Onboarding Guide on the "Using AWS SSO for Local Development" page on Confluence to set up service profile selection on your local machine.
-
    ```bash
    aws sso login
 
    export AWS_PROFILE=keh-github-statistics-scraper
    ```
 
-   This allows you to assume the AWS IAM role for service, enabling the most secure development experience. This also means you will have limited permissions until you exit out of the profile.
+   This allows you to assume the AWS IAM role for the service, enabling the most secure development experience. This also means you will have limited permissions until you exit out of the profile.
+
+   **Note:** See the Developer Onboarding Guide on the "Using AWS SSO for Local Development" page on Confluence to set up service profile selection on your local machine.
 
 
 3. Export Environment Variables
