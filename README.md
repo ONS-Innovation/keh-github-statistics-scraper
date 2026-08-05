@@ -198,6 +198,6 @@ make black
 
 When running, the GitHub Statistics Scraper will upload the data to different buckets in S3 depending on which AWS account you are using.
 
-For dev, it will upload the data as the filename, 'repositoryStatistics-Scraped.json', this is for testing of the scraper exclusively.
+For dev, it will upload the data as the filename, 'repositoryStatistics-Scraped.json'. This is for testing of the scraper exclusively.
 
-For prod, it will upload the data as the filename, 'repositoryStatistics.json', this is then used in the digital landscape.
+For prod, it will upload the data as the filename, 'repositoryStatistics.json'. This is then used in the Digital Landscape.
