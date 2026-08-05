@@ -196,7 +196,7 @@ make black
 
 ## Uploading to S3
 
-When running, the Github Statistics Scraper, will upload the data to different buckets in S3 depending on which AWS account you are using.
+When running, the GitHub Statistics Scraper will upload the data to different buckets in S3 depending on which AWS account you are using.
 
 For dev, it will upload the data as the filename, 'repositoryStatistics-Scraped.json', this is for testing of the scraper exclusively.
 
