@@ -30,6 +30,7 @@ There are a few `TODOs` scattered throughout the README and codebase that will n
     - [Manual Deployment](#manual-deployment)
   - [Testing](#testing)
   - [Linting and formatting](#linting-and-formatting)
+  - [Uploading to S3](#uploading-to-s3)
 
 ## Prerequisites:
 
@@ -192,3 +193,11 @@ Run black:
 ```bash
 make black
 ```
+
+## Uploading to S3
+
+When running, the Github Statistics Scraper, will upload the data to different buckets in S3 depending on which AWS account you are using.
+
+For dev, it will upload the data to a seperate bucket, 'sdp-dev-github-scraper-testing', this is for testing of the scraper exclusively.
+
+For prod, it will upload the data to the main bucket, 'sdp-prod-digital-landscape', this is then used in the digital landscape.
