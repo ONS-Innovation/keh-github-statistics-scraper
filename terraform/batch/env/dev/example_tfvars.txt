@@ -3,7 +3,7 @@ aws_access_key_id     = "999999999999"
 aws_secret_access_key = "999999999999"
 
 domain                = "sdp-dev"
-source_bucket         = "sdp-prod-digital-landscape"
+source_bucket         = "sdp-dev-digital-landscape"
 source_key            = "repositoryStatistics-Scraped.json"
 github_app_client_id  = "999999999999"
 aws_secret_name       = "/sdp-dev/github-tooling-suite/onsdigital"
