@@ -20,7 +20,7 @@ Environment Variables Required:
     AWS_SECRET_ACCESS_KEY: AWS secret key
 
 Output:
-    repositories.json: Contains detailed repository data and statistics
+    repositoryStatistics.json: Contains detailed repository data and statistics
 """
 
 import sys
@@ -901,7 +901,7 @@ def main():
                 ContentType="application/json",
             )
         else:
-            with open("repositories.json", "w", encoding="utf-8") as f:
+            with open("repositoryStatistics.json", "w", encoding="utf-8") as f:
                 json.dump(output, f, indent=2, ensure_ascii=False)
 
         logger.info("Successfully completed repository scanning")
