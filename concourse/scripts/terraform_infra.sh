@@ -6,7 +6,6 @@ set -euo pipefail
 
 apk add --no-cache jq
 
-aws_account_id=$(echo "$secrets" | jq -r .aws_account_id)
 aws_access_key_id=$(echo "$secrets" | jq -r .aws_access_key_id)
 aws_secret_access_key=$(echo "$secrets" | jq -r .aws_secret_access_key)
 
@@ -42,7 +41,6 @@ terraform init -backend-config=env/"${env}"/backend-"${env}".tfbackend -reconfig
 # The following terraform-apply may need to change if the environment variables change
 
 terraform apply \
-	-var "aws_account_id=$aws_account_id" \
 	-var "aws_access_key_id=$aws_access_key_id" \
 	-var "aws_secret_access_key=$aws_secret_access_key" \
 	-var "domain=$domain" \
