@@ -34,6 +34,9 @@ terraform init -backend-config=env/"${env}"/backend-"${env}".tfbackend -reconfig
 
 # The following terraform-apply may need to change if the environment variables change
 
+# The AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are loaded from the environment during this tf apply command.
+# These env vars are populated from `assume_role.sh` before this script is run.
+
 terraform apply \
 	-var "aws_access_key_id=$AWS_ACCESS_KEY_ID" \
 	-var "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" \
