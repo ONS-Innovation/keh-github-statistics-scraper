@@ -9,8 +9,6 @@ apk add --no-cache jq
 domain=$(echo "$secrets" | jq -r .domain)
 ecr_repository=$(echo "$secrets" | jq -r .ecr_repository)
 
-lambda_timeout=$(echo "$secrets" | jq -r .lambda_timeout)
-
 github_app_client_id=$(echo "$secrets" | jq -r .github_app_client_id)
 aws_secret_name=$(echo "$secrets" | jq -r .aws_secret_name)
 github_org=$(echo "$secrets" | jq -r .github_org)
