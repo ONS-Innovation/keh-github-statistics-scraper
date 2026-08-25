@@ -11,11 +11,8 @@ resource "aws_iam_policy" "s3_access" {
 }
 
 module "batch_eventbridge" {
-  source = "git::https://github.com/ONS-Innovation/keh-scheduled-batch-tf-module.git?ref=v1.2.2"
+  source = "git::https://github.com/ONS-Innovation/keh-scheduled-batch-tf-module.git?ref=573bb98c19611103ff9bfae9fa104efe18929542" # v1.3.0
 
-  aws_account_id        = var.aws_account_id
-  aws_access_key_id     = var.aws_access_key_id
-  aws_secret_access_key = var.aws_secret_access_key
   environment          = var.domain
   service_name         = var.service_subdomain
   region              = var.region

@@ -1,3 +1,9 @@
+data "aws_caller_identity" "current" {}
+
+locals {
+  aws_account_id = data.aws_caller_identity.current.account_id
+}
+
 data "aws_iam_policy_document" "secrets_policy" {
   statement {
     effect = "Allow"
@@ -5,7 +11,7 @@ data "aws_iam_policy_document" "secrets_policy" {
       "secretsmanager:GetSecretValue"
     ]
     resources = [
-      "arn:aws:secretsmanager:${var.region}:${var.aws_account_id}:secret:${var.aws_secret_name}-*"
+      "arn:aws:secretsmanager:${var.region}:${local.aws_account_id}:secret:${var.aws_secret_name}-*"
     ]
   }
 }
