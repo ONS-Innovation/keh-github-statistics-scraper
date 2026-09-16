@@ -5,9 +5,15 @@ metadata:
   description: Scheduled AWS batch service that collects GitHub repository statistics and stores them in S3 for the Digital Landscape Statistics page.
   annotations:
     github.com/project-slug: ONS-Innovation/keh-github-statistics-scraper
+  tags:
+    - python
+    - aws-batch
+    - aws-eventbridge
   links:
     - url: https://ons-innovation.github.io/keh-github-statistics-scraper
       title: GitHub Statistics Scraper Documentation
+    - url: mailto:knowledge.exchange.hub@ons.gov.uk
+      title: Contact
 spec:
   type: service
   lifecycle: production
