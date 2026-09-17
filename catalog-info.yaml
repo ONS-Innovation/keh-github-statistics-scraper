@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: keh-github-statistics-scraper
+  description: Scheduled AWS batch service that collects GitHub repository statistics and stores them in S3 for the Digital Landscape Statistics page.
+  annotations:
+    github.com/project-slug: ONS-Innovation/keh-github-statistics-scraper
+  tags:
+    - python
+    - aws-batch
+    - aws-eventbridge
+  links:
+    - url: mailto:knowledge.exchange.hub@ons.gov.uk
+      title: Contact
+spec:
+  type: service
+  lifecycle: production
+  owner: keh-dev
