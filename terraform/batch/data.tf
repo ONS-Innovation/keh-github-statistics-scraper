@@ -11,7 +11,9 @@ data "aws_iam_policy_document" "secrets_policy" {
       "secretsmanager:GetSecretValue"
     ]
     resources = [
-      "arn:aws:secretsmanager:${var.region}:${local.aws_account_id}:secret:${var.aws_secret_name}-*"
+      "arn:aws:secretsmanager:${var.region}:${local.aws_account_id}:secret:${var.github_client_id_secret_name}-*",
+      "arn:aws:secretsmanager:${var.region}:${local.aws_account_id}:secret:${var.github_private_key_secret_name}-*",
+      "arn:aws:secretsmanager:${var.region}:${local.aws_account_id}:secret:${var.alert_secret_name}-*"
     ]
   }
 }
