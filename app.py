@@ -436,17 +436,20 @@ class GitHubDataConsumer:
         # Use toolkit methods to parse CODEOWNERS
         codeowner_handles = self.ql.get_codeowners_from_text(content)
         team_user_list = self.ql.identify_teams_and_users(codeowner_handles)
-        
+
         team_items = [item for item in team_user_list if item["type"] == "team"]
-        
+
         org_team_lookup = {team["slug"]: team["name"] for team in self.org_teams}
-        
+
         # Match teams using the lookup
         matched_teams = []
         for item in team_items:
-            if item["name"] in org_team_lookup and org_team_lookup[item["name"]] not in matched_teams:
+            if (
+                item["name"] in org_team_lookup
+                and org_team_lookup[item["name"]] not in matched_teams
+            ):
                 matched_teams.append(org_team_lookup[item["name"]])
-        
+
         return matched_teams
 
     def process_repo(self, repo):
@@ -857,7 +860,9 @@ def get_github_client():
     if not client_id_secret_name:
         raise Exception("GITHUB_CLIENT_ID_SECRET_NAME environment variable is not set")
     if not private_key_secret_name:
-        raise Exception("GITHUB_PRIVATE_KEY_SECRET_NAME environment variable is not set")
+        raise Exception(
+            "GITHUB_PRIVATE_KEY_SECRET_NAME environment variable is not set"
+        )
 
     # Set up AWS session
     session = boto3.Session()
@@ -866,13 +871,19 @@ def get_github_client():
     # Get GitHub token
     logger.info("Getting GitHub token from AWS Secrets Manager")
 
-    client_id = secret_manager.get_secret_value(SecretId=client_id_secret_name)["SecretString"]
+    client_id = secret_manager.get_secret_value(SecretId=client_id_secret_name)[
+        "SecretString"
+    ]
     client_id = json.loads(client_id).get("ClientID")
 
     if not client_id:
-        raise Exception("Failed to retrieve ClientID from AWS Secrets Manager. Verify that the secret contains a ClientID key.")
+        raise Exception(
+            "Failed to retrieve ClientID from AWS Secrets Manager. Verify that the secret contains a ClientID key."
+        )
 
-    private_key = secret_manager.get_secret_value(SecretId=private_key_secret_name)["SecretString"]
+    private_key = secret_manager.get_secret_value(SecretId=private_key_secret_name)[
+        "SecretString"
+    ]
 
     if not private_key:
         raise Exception("Failed to retrieve private key from AWS Secrets Manager.")
@@ -902,7 +913,9 @@ def main():
         # Initialise AWS Secrets Manager client for alert secrets
         logger.info("Initialising Alerts Client")
 
-        secret_manager = boto3.client("secretsmanager", region_name=os.getenv("AWS_REGION", "eu-west-2"))
+        secret_manager = boto3.client(
+            "secretsmanager", region_name=os.getenv("AWS_REGION", "eu-west-2")
+        )
 
         # Initialise alert service
         alert_secret_name = os.getenv("ALERT_SECRET_NAME")
@@ -968,11 +981,11 @@ def main():
 
         # Send Teams alert
         alerts_client.post_to_webhook(
-            webhook_url=azure_webhook_url, 
+            webhook_url=azure_webhook_url,
             payload={
                 "channel": channel_id,
                 "message": f"<b>{env} Statistics Scraper</b><br>Successfully generated and stored repository statistics with a total of {len(output["repositories"])} repositories.",
-            }
+            },
         )
 
     # A try block being this big is ridiculous
@@ -986,7 +999,7 @@ def main():
             payload={
                 "channel": channel_id,
                 "message": f"<b>{env} Statistics Scraper</b><br>Error occurred: {str(e)}",
-            }
+            },
         )
         raise
 
