@@ -332,17 +332,17 @@ class GitHubDataConsumer:
         Returns:
             list: List of teams
         """
-        query = f"""
-            query ($org: String!) {{
-                organization(login: $org) {{
-                    teams(first: 100) {{
-                        nodes {{
+        query = """
+            query ($org: String!) {
+                organization(login: $org) {
+                    teams(first: 100) {
+                        nodes {
                             name
                             slug
-                        }}
-                    }}
-                }}
-            }}
+                        }
+                    }
+                }
+            }
         """
 
         try:
@@ -467,7 +467,7 @@ class GitHubDataConsumer:
             is_archived = repo.get("isArchived", False)
             last_commit_date = None
             languages = []
-            IAC = []
+            iac = []
             ci_cd = []
             docs = []
             cloud = []
@@ -497,9 +497,9 @@ class GitHubDataConsumer:
                 for edge in repo["languages"]["edges"]:
                     lang_name = edge["node"]["name"]
                     if lang_name == "HCL":
-                        IAC.append("Terraform")
+                        iac.append("Terraform")
                     if lang_name == "Dockerfile":
-                        IAC.append("Docker")
+                        iac.append("Docker")
                     percentage = (edge["size"] / total_size) * 100
 
                     # Choose which statistics dictionary to update based on archive status
@@ -581,7 +581,7 @@ class GitHubDataConsumer:
                 "users": teams,  # Add teams from CODEOWNERS as users
                 "technologies": {
                     "languages": languages,
-                    "IAC": IAC,
+                    "IAC": iac,
                     "docs": docs,
                     "cloud": cloud,
                     "frameworks": frameworks,
@@ -856,11 +856,11 @@ def get_github_client():
     secret_region = os.getenv("AWS_DEFAULT_REGION", "eu-west-2")
 
     if not org:
-        raise Exception("GITHUB_ORG environment variable is not set")
+        raise ValueError("GITHUB_ORG environment variable is not set")
     if not client_id_secret_name:
-        raise Exception("GITHUB_CLIENT_ID_SECRET_NAME environment variable is not set")
+        raise ValueError("GITHUB_CLIENT_ID_SECRET_NAME environment variable is not set")
     if not private_key_secret_name:
-        raise Exception(
+        raise ValueError(
             "GITHUB_PRIVATE_KEY_SECRET_NAME environment variable is not set"
         )
 
@@ -877,7 +877,7 @@ def get_github_client():
     client_id = json.loads(client_id).get("ClientID")
 
     if not client_id:
-        raise Exception(
+        raise ValueError(
             "Failed to retrieve ClientID from AWS Secrets Manager. Verify that the secret contains a ClientID key."
         )
 
@@ -886,11 +886,11 @@ def get_github_client():
     ]
 
     if not private_key:
-        raise Exception("Failed to retrieve private key from AWS Secrets Manager.")
+        raise ValueError("Failed to retrieve private key from AWS Secrets Manager.")
 
     token = get_token_as_installation(org, private_key, client_id)
     if not token:
-        raise Exception("Failed to get GitHub token")
+        raise RuntimeError("Failed to get GitHub token")
 
     return github_graphql_interface(str(token[0])), org
 
@@ -920,7 +920,7 @@ def main():
         # Initialise alert service
         alert_secret_name = os.getenv("ALERT_SECRET_NAME")
         if not alert_secret_name:
-            raise Exception("ALERT_SECRET_NAME environment variable is not set")
+            raise ValueError("ALERT_SECRET_NAME environment variable is not set")
 
         alert_secrets = secret_manager.get_secret_value(SecretId=alert_secret_name)
         alert_secrets_dict = json.loads(alert_secrets["SecretString"])
@@ -935,7 +935,7 @@ def main():
         ]
         for key in required_keys:
             if key not in alert_secrets_dict:
-                raise Exception(f"Missing required alert secret key: {key}")
+                raise ValueError(f"Missing required alert secret key: {key}")
 
         channel_id = alert_secrets_dict.get("channel_id")
         azure_webhook_url = alert_secrets_dict.get("azure_webhook_url")
@@ -984,7 +984,10 @@ def main():
             webhook_url=azure_webhook_url,
             payload={
                 "channel": channel_id,
-                "message": f"<b>{env} Statistics Scraper</b><br>Successfully generated and stored repository statistics with a total of {len(output["repositories"])} repositories.",
+                "message": (
+                    f"<b>{env} Statistics Scraper</b><br>Successfully generated and stored "
+                    f"repository statistics with a total of {len(output['repositories'])} repositories."
+                ),
             },
         )
 
