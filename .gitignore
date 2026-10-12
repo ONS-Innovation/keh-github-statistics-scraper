@@ -4,3 +4,6 @@ repositories.json
 *tfvars
 .DS_Store
 venv/
+.vscode
+
+repositoryStatistics.json

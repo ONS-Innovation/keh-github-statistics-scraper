@@ -847,9 +847,16 @@ def get_github_client():
         tuple: The GitHub client and the organisation name
     """
     org = os.getenv("GITHUB_ORG")
-    client_id = os.getenv("GITHUB_APP_CLIENT_ID")
-    secret_name = os.getenv("AWS_SECRET_NAME")
+    client_id_secret_name = os.getenv("GITHUB_CLIENT_ID_SECRET_NAME")
+    private_key_secret_name = os.getenv("GITHUB_PRIVATE_KEY_SECRET_NAME")
     secret_region = os.getenv("AWS_DEFAULT_REGION", "eu-west-2")
+
+    if not org:
+        raise Exception("GITHUB_ORG environment variable is not set")
+    if not client_id_secret_name:
+        raise Exception("GITHUB_CLIENT_ID_SECRET_NAME environment variable is not set")
+    if not private_key_secret_name:
+        raise Exception("GITHUB_PRIVATE_KEY_SECRET_NAME environment variable is not set")
 
     # Set up AWS session
     session = boto3.Session()
@@ -857,9 +864,19 @@ def get_github_client():
 
     # Get GitHub token
     logger.info("Getting GitHub token from AWS Secrets Manager")
-    secret = secret_manager.get_secret_value(SecretId=secret_name)["SecretString"]
 
-    token = get_token_as_installation(org, secret, client_id)
+    client_id = secret_manager.get_secret_value(SecretId=client_id_secret_name)["SecretString"]
+    client_id = json.loads(client_id).get("ClientID")
+
+    if not client_id:
+        raise Exception("Failed to retrieve ClientID from AWS Secrets Manager. Verify that the secret contains a ClientID key.")
+
+    private_key = secret_manager.get_secret_value(SecretId=private_key_secret_name)["SecretString"]
+
+    if not private_key:
+        raise Exception("Failed to retrieve private key from AWS Secrets Manager.")
+
+    token = get_token_as_installation(org, private_key, client_id)
     if not token:
         raise Exception("Failed to get GitHub token")
 
