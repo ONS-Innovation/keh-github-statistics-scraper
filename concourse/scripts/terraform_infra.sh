@@ -9,9 +9,11 @@ apk add --no-cache jq
 domain=$(echo "$secrets" | jq -r .domain)
 ecr_repository=$(echo "$secrets" | jq -r .ecr_repository)
 
-github_app_client_id=$(echo "$secrets" | jq -r .github_app_client_id)
-aws_secret_name=$(echo "$secrets" | jq -r .aws_secret_name)
+github_client_id_secret_name=$(echo "$secrets" | jq -r .github_client_id_secret_name)
+github_private_key_secret_name=$(echo "$secrets" | jq -r .github_private_key_secret_name)
 github_org=$(echo "$secrets" | jq -r .github_org)
+
+alert_secret_name=$(echo "$secrets" | jq -r .alert_secret_name)
 
 source_bucket=$(echo "$secrets" | jq -r .source_bucket)
 source_key=$(echo "$secrets" | jq -r .source_key)
@@ -35,9 +37,10 @@ terraform init -backend-config=env/"${env}"/backend-"${env}".tfbackend -reconfig
 terraform apply \
 	-var "domain=$domain" \
 	-var "ecr_repository=$ecr_repository" \
-	-var "github_app_client_id=$github_app_client_id" \
-	-var "aws_secret_name=$aws_secret_name" \
+	-var "github_client_id_secret_name=$github_client_id_secret_name" \
+	-var "github_private_key_secret_name=$github_private_key_secret_name" \
 	-var "github_org=$github_org" \
+	-var "alert_secret_name=$alert_secret_name" \
 	-var "source_bucket=$source_bucket" \
 	-var "source_key=$source_key" \
 	-var "batch_size=$batch_size" \
