@@ -83,14 +83,18 @@ variable "source_key" {
   default     = "repositories.json"
 }
 
-variable "github_app_client_id" {
-  description = "Github App Client ID"
+variable "github_client_id_secret_name" {
+  description = "Github Client ID Secret Name"
   type        = string
-  sensitive   = true
 }
 
-variable "aws_secret_name" {
-  description = "AWS Secret Name"
+variable "github_private_key_secret_name" {
+  description = "Github Private Key Secret Name"
+  type        = string
+}
+
+variable "alert_secret_name" {
+  description = "Alert Secret Name"
   type        = string
 }
 

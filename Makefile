@@ -14,13 +14,13 @@ clean:
 	rm -rf __pycache__
 
 black:
-	poetry run black . || true
+	poetry run black .
 
 ruff:
-	poetry run ruff check . || true
+	poetry run ruff check .
 
 pylint:
-	poetry run pylint . || true
+	poetry run pylint .
 
 lint:
 	make black

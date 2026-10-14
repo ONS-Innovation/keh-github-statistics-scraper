@@ -33,8 +33,9 @@ import queue
 import threading
 import functools
 import boto3
-from requests.exceptions import ChunkedEncodingError, RequestException
+from requests.exceptions import RequestException
 from github_api_toolkit import github_graphql_interface, get_token_as_installation
+from keh_teams_alert import TeamsAlertClient
 
 KEYWORDS_FILE = {
     "keywords": {
@@ -331,17 +332,17 @@ class GitHubDataConsumer:
         Returns:
             list: List of teams
         """
-        query = f"""
-            query ($org: String!) {{
-                organization(login: $org) {{
-                    teams(first: 100) {{
-                        nodes {{
+        query = """
+            query ($org: String!) {
+                organization(login: $org) {
+                    teams(first: 100) {
+                        nodes {
                             name
                             slug
-                        }}
-                    }}
-                }}
-            }}
+                        }
+                    }
+                }
+            }
         """
 
         try:
@@ -435,17 +436,20 @@ class GitHubDataConsumer:
         # Use toolkit methods to parse CODEOWNERS
         codeowner_handles = self.ql.get_codeowners_from_text(content)
         team_user_list = self.ql.identify_teams_and_users(codeowner_handles)
-        
+
         team_items = [item for item in team_user_list if item["type"] == "team"]
-        
+
         org_team_lookup = {team["slug"]: team["name"] for team in self.org_teams}
-        
+
         # Match teams using the lookup
         matched_teams = []
         for item in team_items:
-            if item["name"] in org_team_lookup and org_team_lookup[item["name"]] not in matched_teams:
+            if (
+                item["name"] in org_team_lookup
+                and org_team_lookup[item["name"]] not in matched_teams
+            ):
                 matched_teams.append(org_team_lookup[item["name"]])
-        
+
         return matched_teams
 
     def process_repo(self, repo):
@@ -463,7 +467,7 @@ class GitHubDataConsumer:
             is_archived = repo.get("isArchived", False)
             last_commit_date = None
             languages = []
-            IAC = []
+            iac = []
             ci_cd = []
             docs = []
             cloud = []
@@ -493,9 +497,9 @@ class GitHubDataConsumer:
                 for edge in repo["languages"]["edges"]:
                     lang_name = edge["node"]["name"]
                     if lang_name == "HCL":
-                        IAC.append("Terraform")
+                        iac.append("Terraform")
                     if lang_name == "Dockerfile":
-                        IAC.append("Docker")
+                        iac.append("Docker")
                     percentage = (edge["size"] / total_size) * 100
 
                     # Choose which statistics dictionary to update based on archive status
@@ -577,7 +581,7 @@ class GitHubDataConsumer:
                 "users": teams,  # Add teams from CODEOWNERS as users
                 "technologies": {
                     "languages": languages,
-                    "IAC": IAC,
+                    "IAC": iac,
                     "docs": docs,
                     "cloud": cloud,
                     "frameworks": frameworks,
@@ -847,9 +851,18 @@ def get_github_client():
         tuple: The GitHub client and the organisation name
     """
     org = os.getenv("GITHUB_ORG")
-    client_id = os.getenv("GITHUB_APP_CLIENT_ID")
-    secret_name = os.getenv("AWS_SECRET_NAME")
+    client_id_secret_name = os.getenv("GITHUB_CLIENT_ID_SECRET_NAME")
+    private_key_secret_name = os.getenv("GITHUB_PRIVATE_KEY_SECRET_NAME")
     secret_region = os.getenv("AWS_DEFAULT_REGION", "eu-west-2")
+
+    if not org:
+        raise ValueError("GITHUB_ORG environment variable is not set")
+    if not client_id_secret_name:
+        raise ValueError("GITHUB_CLIENT_ID_SECRET_NAME environment variable is not set")
+    if not private_key_secret_name:
+        raise ValueError(
+            "GITHUB_PRIVATE_KEY_SECRET_NAME environment variable is not set"
+        )
 
     # Set up AWS session
     session = boto3.Session()
@@ -857,11 +870,27 @@ def get_github_client():
 
     # Get GitHub token
     logger.info("Getting GitHub token from AWS Secrets Manager")
-    secret = secret_manager.get_secret_value(SecretId=secret_name)["SecretString"]
 
-    token = get_token_as_installation(org, secret, client_id)
+    client_id = secret_manager.get_secret_value(SecretId=client_id_secret_name)[
+        "SecretString"
+    ]
+    client_id = json.loads(client_id).get("ClientID")
+
+    if not client_id:
+        raise ValueError(
+            "Failed to retrieve ClientID from AWS Secrets Manager. Verify that the secret contains a ClientID key."
+        )
+
+    private_key = secret_manager.get_secret_value(SecretId=private_key_secret_name)[
+        "SecretString"
+    ]
+
+    if not private_key:
+        raise ValueError("Failed to retrieve private key from AWS Secrets Manager.")
+
+    token = get_token_as_installation(org, private_key, client_id)
     if not token:
-        raise Exception("Failed to get GitHub token")
+        raise RuntimeError("Failed to get GitHub token")
 
     return github_graphql_interface(str(token[0])), org
 
@@ -881,9 +910,50 @@ def main():
         # Get GitHub client
         ql, org = get_github_client()
 
+        # Initialise AWS Secrets Manager client for alert secrets
+        logger.info("Initialising Alerts Client")
+
+        secret_manager = boto3.client(
+            "secretsmanager", region_name=os.getenv("AWS_REGION", "eu-west-2")
+        )
+
+        # Initialise alert service
+        alert_secret_name = os.getenv("ALERT_SECRET_NAME")
+        if not alert_secret_name:
+            raise ValueError("ALERT_SECRET_NAME environment variable is not set")
+
+        alert_secrets = secret_manager.get_secret_value(SecretId=alert_secret_name)
+        alert_secrets_dict = json.loads(alert_secrets["SecretString"])
+
+        # Verify required secret values are present
+        required_keys = [
+            "azure_tenant_id",
+            "azure_client_id",
+            "azure_client_secret",
+            "azure_webhook_url",
+            "channel_id",
+        ]
+        for key in required_keys:
+            if key not in alert_secrets_dict:
+                raise ValueError(f"Missing required alert secret key: {key}")
+
+        channel_id = alert_secrets_dict.get("channel_id")
+        azure_webhook_url = alert_secrets_dict.get("azure_webhook_url")
+
+        alerts_client = TeamsAlertClient(
+            tenant_id=alert_secrets_dict.get("azure_tenant_id"),
+            client_id=alert_secrets_dict.get("azure_client_id"),
+            client_secret=alert_secrets_dict.get("azure_client_secret"),
+            scope="https://management.azure.com/.default",
+        )
+
         # Get repository data
         batch_size = int(os.getenv("BATCH_SIZE", "30"))
         logger.info(f"Processing repositories with batch size: {batch_size}")
+
+        env = "local"
+        bucket = "local"
+        key = "repositoryStatistics.json"
 
         output = get_repository_technologies(ql, org, batch_size)
 
@@ -891,6 +961,9 @@ def main():
             # Save to S3
             bucket = os.getenv("SOURCE_BUCKET")
             key = os.getenv("SOURCE_KEY")
+
+            env = bucket.split("-")[:2]
+            env = "-".join(env)
 
             logger.info(f"Saving results to S3: {bucket}/{key}")
             s3 = boto3.client("s3")
@@ -906,8 +979,31 @@ def main():
 
         logger.info("Successfully completed repository scanning")
 
+        # Send Teams alert
+        alerts_client.post_to_webhook(
+            webhook_url=azure_webhook_url,
+            payload={
+                "channel": channel_id,
+                "message": (
+                    f"<b>{env} Statistics Scraper</b><br>Successfully generated and stored "
+                    f"repository statistics with a total of {len(output['repositories'])} repositories."
+                ),
+            },
+        )
+
+    # A try block being this big is ridiculous
+    # This repository hurts ~ KP
     except Exception as e:
         logger.error(f"Error in main process: {str(e)}")
+
+        # Send Teams alert for failure
+        alerts_client.post_to_webhook(
+            webhook_url=azure_webhook_url,
+            payload={
+                "channel": channel_id,
+                "message": f"<b>{env} Statistics Scraper</b><br>Error occurred: {str(e)}",
+            },
+        )
         raise
 
 

@@ -13,17 +13,17 @@ resource "aws_iam_policy" "s3_access" {
 module "batch_eventbridge" {
   source = "git::https://github.com/ONS-Innovation/keh-scheduled-batch-tf-module.git?ref=573bb98c19611103ff9bfae9fa104efe18929542" # v1.3.0
 
-  environment          = var.domain
-  service_name         = var.service_subdomain
+  environment         = var.domain
+  service_name        = var.service_subdomain
   region              = var.region
   project_tag         = var.project_tag
   team_owner_tag      = var.team_owner_tag
   business_owner_tag  = var.business_owner_tag
   ecr_repository_name = var.ecr_repository
   container_ver       = var.container_ver
-  schedule           = var.schedule
-  private_subnet_ids = data.terraform_remote_state.vpc.outputs.private_subnets
-  vpc_id = data.terraform_remote_state.vpc.outputs.vpc_id
+  schedule            = var.schedule
+  private_subnet_ids  = data.terraform_remote_state.vpc.outputs.private_subnets
+  vpc_id              = data.terraform_remote_state.vpc.outputs.vpc_id
 
   service_environment_variables = [
     {
@@ -35,16 +35,20 @@ module "batch_eventbridge" {
       value = var.source_key
     },
     {
-      name  = "GITHUB_APP_CLIENT_ID"
-      value = var.github_app_client_id
+      name  = "GITHUB_CLIENT_ID_SECRET_NAME"
+      value = var.github_client_id_secret_name
     },
     {
-      name  = "AWS_SECRET_NAME"
-      value = var.aws_secret_name
+      name  = "GITHUB_PRIVATE_KEY_SECRET_NAME"
+      value = var.github_private_key_secret_name
     },
     {
       name  = "GITHUB_ORG"
       value = var.github_org
+    },
+    {
+      name  = "ALERT_SECRET_NAME"
+      value = var.alert_secret_name
     },
     {
       name  = "BATCH_SIZE"

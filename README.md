@@ -43,9 +43,9 @@ There are a few `TODOs` scattered throughout the README and codebase that will n
 
 1. Install Dependencies:
 
-    ```bash
-    make install
-    ```
+   ```bash
+   make install
+   ```
 
 2. Sign in with AWS SSO, and export the correct profile for this service:
 
@@ -59,34 +59,43 @@ There are a few `TODOs` scattered throughout the README and codebase that will n
 
    **Note:** See the Developer Onboarding Guide on the "Using AWS SSO for Local Development" page on Confluence to set up service profile selection on your local machine.
 
-
 3. Export Environment Variables
 
-    ```bash
-    # GitHub
-    export AWS_SECRET_NAME=/<env>/github-tooling-suite/<onsdigital/ons-innovation>
-    export GITHUB_APP_CLIENT_ID=<CLIENT_ID>
-    export GITHUB_ORG=<onsdigital/ons-innovation>
+   ```bash
+   export ENVIRONMENT=<development/production>
+   export GITHUB_ORG=<onsdigital/ons-innovation>
+   export GITHUB_CLIENT_ID_SECRET_NAME=<github_client_id_secret_name>
+   export GITHUB_PRIVATE_KEY_SECRET_NAME=<github_private_key_secret_name>
+   export ALERT_SECRET_NAME=<alert_secret_name>
+   ```
 
-    # Other
-    export SOURCE_BUCKET=<BUCKET_NAME>
-    export SOURCE_KEY=<KEY>
-    export BATCH_SIZE=<BATCH_SIZE>
-    export ENVIRONMENT=<development/production>
-    ```
+   _Optional Variables:_
 
-    | Variable        | Description                                                                        |
-    | --------------- | ---------------------------------------------------------------------------------- |
-    | `source_bucket` | The S3 bucket that will store the output of the script.                            |
-    | `source_key`    | The key of the file that will store the output of the script.                      |
-    | `batch_size`    | The number of repositories that will be scraped in each batch.                     |
-    | `environment`   | Determines where to save the results. `development`: locally, `production`: to S3. |
+   ```bash
+   export SOURCE_BUCKET=<BUCKET_NAME>
+   export SOURCE_KEY=<KEY>
+   export BATCH_SIZE=<BATCH_SIZE>
+   ```
+
+   **Variable Descriptions**
+
+   | Variable                         | Description                                                                             |
+   | -------------------------------- | --------------------------------------------------------------------------------------- |
+   | `environment`                    | Determines where to save the results. `development`: locally, `production`: to S3.      |
+   | `github_org`                     | The GitHub organisation to scrape repositories from.                                    |
+   | `github_client_id_secret_name`   | The name of the secret in AWS Secrets Manager that stores the GitHub App client ID.     |
+   | `github_private_key_secret_name` | The name of the secret in AWS Secrets Manager that stores the GitHub App private key.   |
+   | `alert_secret_name`              | The name of the secret in AWS Secrets Manager that stores alerting credentials.         |
+   | **Optional**                     |
+   | `source_bucket`                  | The S3 bucket that will store the output of the script (only used in production).       |
+   | `source_key`                     | The key of the file that will store the output of the script (only used in production). |
+   | `batch_size`                     | The number of repositories that will be scraped in each batch (Default: 30).            |
 
 4. Run the script:
 
-    ```bash
-    make run
-    ```
+   ```bash
+   make run
+   ```
 
 5. To exit the profile:
 
@@ -170,26 +179,31 @@ TODO: Add tests.
 TODO: Update linting and formatting practices to bring the repo in line with common team practices.
 
 Install dev dependencies:
+
 ```bash
 make install-dev
 ```
 
 Run lint command:
+
 ```bash
 make lint
 ```
 
 Run ruff check:
+
 ```bash
 make ruff
 ```
 
 Run pylint:
+
 ```bash
 make pylint
 ```
 
 Run black:
+
 ```bash
 make black
 ```
